@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bachelorette Question Game - Admin</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #fff8f8;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: white;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.15);
+      max-width: 700px;
+      width: 100%;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      color: #d81b60;
+      font-size: 32px;
+      margin-bottom: 20px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 60px;
+      max-height: 120px;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      overflow-y: auto;
+      line-height: 1.4;
+      font-family: inherit;
+    }
+
+    button {
+      background-color: #d81b60;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background-color: #c2185b;
+    }
+
+    .filter-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .filter-buttons button {
+      padding: 6px 12px;
+      font-size: 14px;
+      border-radius: 6px;
+      background-color: #fce4ec;
+      color: #d81b60;
+      border: 1px solid #d81b60;
+    }
+
+    .filter-buttons button.active {
+      background-color: #d81b60;
+      color: white;
+    }
+
+    #questionWrapper {
+      height: 400px;
+      overflow-y: auto;
+      margin-bottom: 20px;
+      border: 1px solid #eee;
+      padding: 10px;
+      border-radius: 8px;
+      background: #fffafc;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    li {
+      text-align: left;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      background-color: #fff3f8;
+      border-left: 5px solid #d81b60;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .question-text {
+      flex: 1;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      margin-left: 10px;
+    }
+
+    .actions button {
+      padding: 4px 8px;
+      font-size: 12px;
+      border-radius: 4px;
+    }
+
+    .nav-links {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      background-color: #d81b60;
+      color: white;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: bold;
+      transition: background-color 0.2s;
+    }
+
+    .nav-links a:hover {
+      background-color: #c2185b;
+    }
+
+    .soundboard {
+      background-color: #fff0f5;
+      border-top: 1px solid #ccc;
+      padding: 20px;
+      text-align: center;
+      width: 100%;
+    }
+
+    .soundboard h2 {
+      color: #d81b60;
+    }
+
+    .soundboard button {
+      margin: 6px;
+      padding: 10px 16px;
+      font-size: 14px;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- existing admin UI here -->
+  </div>
+
+  <div class="soundboard">
+    <h2>🎛️ Host Soundboard</h2>
+    <button onclick="playSound('claps')">👏 Claps</button>
+    <button onclick="playSound('cheer')">🎉 Cheer</button>
+    <button onclick="playSound('applause')">🙌 Applause</button>
+    <button onclick="playSound('shock')">😱 Shock</button>
+    <button onclick="playSound('boo')">😤 Boo</button>
+    <button onclick="playSound('crickets')">🦗 Crickets</button>
+    <button onclick="playSound('laugh')">😂 Laugh</button>
+    <button onclick="playSound('evil')">😈 Evil Laugh</button>
+
+    <audio id="sound-claps" src="/static/sound/claps-44774.mp3"></audio>
+    <audio id="sound-cheer" src="/static/sound/applause-cheer-236786.mp3"></audio>
+    <audio id="sound-applause" src="/static/sound/crowd-applause-113728.mp3"></audio>
+    <audio id="sound-shock" src="/static/sound/crowd-shocked-reaction-352766.mp3"></audio>
+    <audio id="sound-boo" src="/static/sound/crowd-boo-disapproval-demo-309882.mp3"></audio>
+    <audio id="sound-crickets" src="/static/sound/cricket-250777.mp3"></audio>
+    <audio id="sound-laugh" src="/static/sound/90s-sitcom-laugh-track-v2-353986.mp3"></audio>
+    <audio id="sound-evil" src="/static/sound/evil-laugh-89423.mp3"></audio>
+  </div>
+
+  <script>
+    const soundNames = ['claps', 'cheer', 'applause', 'shock', 'boo', 'crickets', 'laugh', 'evil'];
+
+    function playSound(name) {
+      stopAllSounds();
+      const el = document.getElementById(`sound-${name}`);
+      if (el) {
+        el.currentTime = 0;
+        el.play();
+      }
+    }
+
+    function stopAllSounds() {
+      soundNames.forEach(name => {
+        const el = document.getElementById(`sound-${name}`);
+        if (el && !el.paused) {
+          el.pause();
+          el.currentTime = 0;
+        }
+      });
+    }
+  </script>
+</body>
+</html>
