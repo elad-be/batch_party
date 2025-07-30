@@ -1,4 +1,3 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,7 +8,7 @@
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      background-color: #fef0f5;
+      background-color: #fff8f8;
       margin: 0;
       padding: 0;
       display: flex;
@@ -17,55 +16,123 @@
       align-items: center;
       min-height: 100vh;
     }
+
     .container {
       background: white;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-      max-width: 600px;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.15);
+      max-width: 700px;
       width: 100%;
       text-align: center;
     }
+
     h1 {
       color: #d81b60;
+      font-size: 32px;
       margin-bottom: 20px;
     }
+
     form {
       display: flex;
-      gap: 10px;
-      margin-bottom: 30px;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 20px;
     }
-    input[type="text"] {
-      flex: 1;
-      padding: 10px;
-      border: 1px solid #ccc;
+
+    textarea {
+      resize: vertical;
+      min-height: 60px;
+      max-height: 120px;
+      padding: 12px;
       border-radius: 8px;
       font-size: 16px;
+      border: 1px solid #ccc;
+      overflow-y: auto;
+      line-height: 1.4;
+      font-family: inherit;
     }
+
     button {
       background-color: #d81b60;
       color: white;
       border: none;
-      padding: 10px 16px;
+      padding: 12px 20px;
       border-radius: 8px;
+      font-size: 16px;
       cursor: pointer;
       font-weight: bold;
     }
+
     button:hover {
       background-color: #c2185b;
     }
+
+    .filter-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .filter-buttons button {
+      padding: 6px 12px;
+      font-size: 14px;
+      border-radius: 6px;
+      background-color: #fce4ec;
+      color: #d81b60;
+      border: 1px solid #d81b60;
+    }
+
+    .filter-buttons button.active {
+      background-color: #d81b60;
+      color: white;
+    }
+
+    #questionWrapper {
+      height: 400px;
+      overflow-y: auto;
+      margin-bottom: 20px;
+      border: 1px solid #eee;
+      padding: 10px;
+      border-radius: 8px;
+      background: #fffafc;
+    }
+
     ul {
       list-style: none;
       padding: 0;
+      margin: 0;
     }
+
     li {
       text-align: left;
       padding: 10px;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
       border-radius: 6px;
       background-color: #fff3f8;
       border-left: 5px solid #d81b60;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
+
+    .question-text {
+      flex: 1;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      margin-left: 10px;
+    }
+
+    .actions button {
+      padding: 4px 8px;
+      font-size: 12px;
+      border-radius: 4px;
+    }
+
     li span {
       font-weight: bold;
     }
@@ -73,34 +140,101 @@
 </head>
 <body>
   <div class="container">
-    <h1>Bachelorette Question Game</h1>
+    <h1>Bachelorette Question Game: Admin</h1>
 
     <form id="questionForm">
-      <input type="text" id="questionInput" placeholder="Enter a new question..." required />
+      <textarea id="questionInput" placeholder="Enter questions here… Each line will be added as a separate question. Use Shift+Enter for newlines."></textarea>
       <button type="submit">Add</button>
     </form>
 
     <h2>Questions</h2>
-    <ul id="questionList"></ul>
+    <div class="filter-buttons">
+      <button type="button" class="active" onclick="setFilter('all')">All</button>
+      <button type="button" onclick="setFilter('answered')">Answered</button>
+      <button type="button" onclick="setFilter('unanswered')">Not Answered</button>
+    </div>
+
+    <div id="questionWrapper">
+      <ul id="questionList"></ul>
+    </div>
   </div>
-
+  <audio id="soundAddQuestion" src="/static/sound/add_question.mp3"></audio>
   <script>
-    document.getElementById('questionForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const question = document.getElementById('questionInput').value.trim();
-      if (!question) return;
+    let currentFilter = 'all';
 
-      const response = await fetch('/add_question', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question })
-      });
-
-      if (response.ok) {
-        document.getElementById('questionInput').value = '';
-        loadQuestions();
+    const textarea = document.getElementById('questionInput');
+    textarea.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        document.getElementById('questionForm').requestSubmit();
       }
     });
+
+    document.getElementById('questionForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const rawInput = textarea.value.trim();
+      if (!rawInput) return;
+
+      const questions = rawInput.split('\n').map(q => q.trim()).filter(q => q.length > 0);
+
+      const addSound = document.getElementById('soundAddQuestion');
+
+      for (let question of questions) {
+        await fetch('/add_question', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question })
+        });
+        if (addSound) addSound.play();
+      }
+      textarea.value = '';
+      loadQuestions();
+    });
+
+    function setFilter(filter) {
+      currentFilter = filter;
+      document.querySelectorAll('.filter-buttons button').forEach(btn => btn.classList.remove('active'));
+      document.querySelector(`.filter-buttons button[onclick*="${filter}"]`).classList.add('active');
+      loadQuestions();
+    }
+
+    async function deleteQuestion(id) {
+      await fetch(`/delete_question/${id}`, { method: 'DELETE' });
+      loadQuestions();
+    }
+
+    async function editQuestion(id, currentText, wasAnswered) {
+      const li = document.getElementById(`question-${id}`);
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.value = currentText;
+      input.style.flex = '1';
+      input.style.marginRight = '10px';
+
+      const saveBtn = document.createElement('button');
+      saveBtn.textContent = 'Save';
+      saveBtn.onclick = async () => {
+        const newText = input.value.trim();
+        if (newText) {
+          let confirmReset = false;
+          if (wasAnswered && newText !== currentText) {
+            confirmReset = confirm("This question was already answered. Do you want to mark it as unanswered?");
+          }
+
+          await fetch(`/edit_question/${id}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ question: newText, reset_answer: confirmReset })
+          });
+          loadQuestions();
+        }
+      };
+
+      const container = li.querySelector('.question-text');
+      container.innerHTML = '';
+      container.appendChild(input);
+      container.appendChild(saveBtn);
+    }
 
     async function loadQuestions() {
       const response = await fetch('/get_questions');
@@ -108,9 +242,26 @@
 
       const questionList = document.getElementById('questionList');
       questionList.innerHTML = '';
-      data.questions.forEach(q => {
+
+      let filtered = data.questions;
+      if (currentFilter === 'answered') {
+        filtered = filtered.filter(q => q.answered);
+      } else if (currentFilter === 'unanswered') {
+        filtered = filtered.filter(q => !q.answered);
+      }
+
+      filtered.forEach(q => {
         const li = document.createElement('li');
-        li.innerHTML = `<span>Q:</span> ${q.question} <br><span>Status:</span> ${q.answered ? '✅ Answered' : '❌ Not answered'}`;
+        li.id = `question-${q.id}`;
+        li.innerHTML = `
+          <div class="question-text">
+            <span>Q:</span> ${q.question} <br><span>Status:</span> ${q.answered ? '✅ Answered' : '❌ Not answered'}
+          </div>
+          <div class="actions">
+            <button onclick="editQuestion(${q.id}, \`${q.question.replace(/`/g, '\`')}\`, ${q.answered})">Edit</button>
+            <button onclick="deleteQuestion(${q.id})">Delete</button>
+          </div>
+        `;
         questionList.appendChild(li);
       });
     }

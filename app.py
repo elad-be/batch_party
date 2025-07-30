@@ -33,6 +33,33 @@ UPLOAD_FOLDER = 'static/audio'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+@app.route('/delete_question/<int:question_id>', methods=['DELETE'])
+def delete_question(question_id):
+    question = Question.query.get(question_id)
+    if question:
+        db.session.delete(question)
+        db.session.commit()
+        return jsonify({'success': True})
+    return jsonify({'error': 'Question not found'}), 404
+
+# Route to edit a question
+@app.route('/edit_question/<int:question_id>', methods=['POST'])
+def edit_question(question_id):
+    data = request.get_json()
+    question = Question.query.get(question_id)
+
+    if not question or 'question' not in data:
+        return jsonify({'error': 'Invalid request'}), 404
+
+    question.question = data['question'].strip()
+    
+    if data.get('reset_answer', False):
+        question.answered = False  # mark as unanswered if user confirmed
+
+    db.session.commit()
+    return jsonify({'success': True})
+
+
 @app.route('/upload_audio', methods=['POST'])
 def upload_audio():
     file = request.files['audio']

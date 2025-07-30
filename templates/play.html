@@ -24,16 +24,33 @@
       max-width: 800px;
       width: 100%;
       text-align: center;
+      position: relative;
     }
     h1 {
       color: #d81b60;
       font-size: 36px;
+      margin-bottom: 20px;
+    }
+    #progressBarContainer {
+      width: 100%;
+      background-color: #f0f0f0;
+      border-radius: 10px;
+      overflow: hidden;
       margin-bottom: 30px;
+      height: 20px;
+    }
+    #progressBar {
+      height: 100%;
+      width: 0%;
+      background-color: #d81b60;
+      transition: width 0.5s ease-in-out;
     }
     #questionText {
       font-size: 28px;
       font-weight: 600;
       margin-bottom: 20px;
+      opacity: 0;
+      transition: opacity 0.5s;
     }
     #answerText {
       display: none;
@@ -41,10 +58,25 @@
       font-weight: bold;
       color: #111;
       margin-top: 20px;
+      opacity: 0;
+      transition: opacity 0.5s;
     }
     audio {
       display: none;
       margin-top: 20px;
+    }
+    #countdown {
+      font-size: 40px;
+      font-weight: bold;
+      margin-top: 20px;
+      color: #d81b60;
+      display: none;
+      animation: pop 1s ease-out;
+    }
+    @keyframes pop {
+      0% { transform: scale(1); opacity: 0; }
+      50% { transform: scale(1.5); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
     }
     button {
       background-color: #d81b60;
@@ -63,15 +95,70 @@
     .nav-buttons {
       margin-top: 30px;
     }
+    .judge-panel-wrapper {
+      position: absolute;
+      left: -180px;
+      top: 50%;
+      transform: translateY(-50%);
+      background-color: white;
+      padding: 10px;
+      border-radius: 16px;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.15);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .judge-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    .judge-panel button {
+      font-size: 24px;
+      padding: 14px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .judge-panel .correct {
+      background-color: #4CAF50;
+    }
+    .judge-panel .wrong {
+      background-color: #F44336;
+    }
+    #matchCounter {
+      background-color: #fff;
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-weight: bold;
+      color: #2e7d32;
+      font-size: 18px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Bachelorette Game: Live View</h1>
 
+    <div class="judge-panel-wrapper">
+      <div id="matchCounter">✔ Matches: 0</div>
+      <div class="judge-panel">
+        <button class="correct" onclick="markMatch(true)">✔</button>
+        <button class="wrong" onclick="markMatch(false)">✖</button>
+      </div>
+    </div>
+
+    <div id="progressBarContainer">
+      <div id="progressBar"></div>
+    </div>
+
     <div id="questionDisplay">
       <p id="questionText">Loading question...</p>
-      <button id="showAnswerBtn" onclick="toggleAnswer()">Show Answer</button>
+      <div id="countdown"></div>
+      <button id="showAnswerBtn" onclick="startCountdown()">Show Answer</button>
       <p id="answerText"></p>
       <audio id="answerAudio" controls></audio>
     </div>
@@ -80,12 +167,17 @@
       <button onclick="prevQuestion()">Back</button>
       <button onclick="nextQuestion()">Next</button>
     </div>
+
+    <audio id="soundCorrect" src="/static/sound/correct.mp3"></audio>
+    <audio id="soundWrong" src="/static/sound/wrong.mp3"></audio>
+    <audio id="soundCountdown" src="/static/sound/countdown.mp3"></audio>
   </div>
 
   <script>
     let questions = [];
     let currentIndex = 0;
     let answerVisible = false;
+    let matchCount = 0;
 
     async function loadQuestions() {
       const res = await fetch('/get_answered_questions');
@@ -99,6 +191,8 @@
       const answerText = document.getElementById('answerText');
       const audioPlayer = document.getElementById('answerAudio');
       const showAnswerBtn = document.getElementById('showAnswerBtn');
+      const countdown = document.getElementById('countdown');
+      const progressBar = document.getElementById('progressBar');
 
       const q = questions[currentIndex];
       if (!q) {
@@ -106,17 +200,30 @@
         answerText.style.display = 'none';
         audioPlayer.style.display = 'none';
         showAnswerBtn.style.display = 'none';
+        countdown.style.display = 'none';
+        progressBar.style.width = '100%';
         return;
       }
 
-      questionText.textContent = q.question;
+      const progressPercent = ((currentIndex + 1) / questions.length) * 100;
+      progressBar.style.width = progressPercent + '%';
+
+      questionText.style.opacity = 0;
+      setTimeout(() => {
+        questionText.textContent = q.question;
+        questionText.style.opacity = 1;
+      }, 100);
+
       answerText.textContent = q.answered_text || '';
       answerText.style.display = 'none';
+      answerText.style.opacity = 0;
       showAnswerBtn.textContent = 'Show Answer';
+      showAnswerBtn.style.display = 'inline-block';
       answerVisible = false;
+      countdown.style.display = 'none';
 
       if (q.answered_audio_path) {
-        audioPlayer.src = '/' + q.answered_audio_path;;
+        audioPlayer.src = '/' + q.answered_audio_path;
         audioPlayer.style.display = 'none';
       } else {
         audioPlayer.style.display = 'none';
@@ -124,18 +231,34 @@
       }
     }
 
+    function startCountdown() {
+      const countdown = document.getElementById('countdown');
+      const sound = document.getElementById('soundCountdown');
+      sound.play();
+      countdown.style.display = 'block';
+      countdown.textContent = '3';
+      setTimeout(() => countdown.textContent = '2', 800);
+      setTimeout(() => countdown.textContent = '1', 1600);
+      setTimeout(() => {
+        countdown.style.display = 'none';
+        toggleAnswer();
+      }, 2400);
+    }
+
     function toggleAnswer() {
-      answerVisible = !answerVisible;
       const answerText = document.getElementById('answerText');
       const audioPlayer = document.getElementById('answerAudio');
       const btn = document.getElementById('showAnswerBtn');
 
-      answerText.style.display = answerVisible ? 'block' : 'none';
+      answerVisible = !answerVisible;
+      btn.textContent = answerVisible ? 'Hide Answer' : 'Show Answer';
+
       if (questions[currentIndex].answered_audio_path) {
         audioPlayer.style.display = answerVisible ? 'block' : 'none';
+      } else {
+        answerText.style.display = answerVisible ? 'block' : 'none';
+        answerText.style.opacity = answerVisible ? 1 : 0;
       }
-
-      btn.textContent = answerVisible ? 'Hide Answer' : 'Show Answer';
     }
 
     function nextQuestion() {
@@ -146,6 +269,21 @@
     function prevQuestion() {
       if (currentIndex > 0) currentIndex--;
       showQuestion();
+    }
+
+    function markMatch(correct) {
+      const correctSound = document.getElementById('soundCorrect');
+      const wrongSound = document.getElementById('soundWrong');
+      const counterDisplay = document.getElementById('matchCounter');
+
+      if (correct) {
+        matchCount++;
+        correctSound.play();
+      } else {
+        wrongSound.play();
+      }
+
+      counterDisplay.textContent = `✔ Matches: ${matchCount}`;
     }
 
     loadQuestions();
