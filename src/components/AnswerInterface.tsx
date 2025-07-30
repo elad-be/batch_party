@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useQuestions } from '../hooks/useQuestions';
 import { api } from '../services/api';
 
@@ -85,6 +86,15 @@ export const AnswerInterface: React.FC<AnswerInterfaceProps> = ({
       <div className="container" data-hook={dataHook}>
         <h1>Answer the Questions</h1>
         <p>No more questions.</p>
+
+        <div className="nav-buttons">
+          <Link to="/" className="nav-button">
+            Go to Admin Page
+          </Link>
+          <Link to="/play" className="nav-button">
+            Go to Play Page
+          </Link>
+        </div>
       </div>
     );
   }
@@ -113,6 +123,15 @@ export const AnswerInterface: React.FC<AnswerInterfaceProps> = ({
       <div className="nav-buttons">
         <button onClick={prevQuestion}>Back</button>
         <button onClick={submitAnswer}>Next</button>
+      </div>
+
+      <div className="nav-buttons" style={{ marginTop: '20px' }}>
+        <Link to="/" className="nav-button">
+          Go to Admin Page
+        </Link>
+        <Link to="/play" className="nav-button">
+          Go to Play Page
+        </Link>
       </div>
     </div>
   );

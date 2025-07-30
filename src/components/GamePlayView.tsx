@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useQuestions } from '../hooks/useQuestions';
 
 interface GamePlayViewProps {
@@ -62,6 +63,15 @@ export const GamePlayView: React.FC<GamePlayViewProps> = ({
       <div className="container" data-hook={dataHook}>
         <h1>Bachelorette Game: Live View</h1>
         <p>No more questions!</p>
+
+        <div className="nav-buttons">
+          <Link to="/" className="nav-button">
+            Go to Admin Page
+          </Link>
+          <Link to="/answer" className="nav-button">
+            Go to Answer Page
+          </Link>
+        </div>
       </div>
     );
   }
@@ -114,6 +124,15 @@ export const GamePlayView: React.FC<GamePlayViewProps> = ({
       <div className="nav-buttons">
         <button onClick={prevQuestion}>Back</button>
         <button onClick={nextQuestion}>Next</button>
+      </div>
+
+      <div className="nav-buttons" style={{ marginTop: '20px' }}>
+        <Link to="/" className="nav-button">
+          Go to Admin Page
+        </Link>
+        <Link to="/answer" className="nav-button">
+          Go to Answer Page
+        </Link>
       </div>
     </div>
   );

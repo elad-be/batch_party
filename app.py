@@ -1,7 +1,8 @@
-from flask import Flask, request, jsonify, render_template
-from flask_sqlalchemy import SQLAlchemy
-from flask_cors import CORS
 import os
+
+from flask import Flask, jsonify, render_template, request
+from flask_cors import CORS
+from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
@@ -30,7 +31,8 @@ class Question(db.Model):
         }
 
 UPLOAD_FOLDER = 'static/audio'
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 @app.route('/delete_question/<int:question_id>', methods=['DELETE'])
@@ -66,7 +68,7 @@ def upload_audio():
     question_id = request.form.get('id')
 
     if file and question_id:
-        filename = secure_filename(f'q{question_id}.webm')
+        filename = secure_filename('q{}.webm'.format(question_id))
         path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(path)
 
