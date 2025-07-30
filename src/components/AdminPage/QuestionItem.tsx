@@ -42,8 +42,8 @@ export const QuestionItem: React.FC<QuestionItemProps> = ({
           </>
         ) : (
           <>
-            <span>Q:</span> {question.question} <br />
-            <span>Status:</span>{' '}
+            <b>Q:</b> {question.question} <br />
+            <b>Status:</b>{' '}
             {question.answered ? '✅ Answered' : '❌ Not answered'}
           </>
         )}
