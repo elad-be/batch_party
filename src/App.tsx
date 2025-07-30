@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { AdminPage } from './components/AdminPage';
 import { AnswerPage } from './components/AnswerPage';
-import { PlayPage } from './components/GamePlayView';
+import { PlayPage } from './components/PlayPage';
 
 const App: React.FC = () => {
   return (
