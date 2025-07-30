@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Play the Game</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #fff8f8;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      background: white;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.15);
+      max-width: 800px;
+      width: 100%;
+      text-align: center;
+    }
+    h1 {
+      color: #d81b60;
+      font-size: 36px;
+      margin-bottom: 30px;
+    }
+    #questionText {
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+    #answerText {
+      display: none;
+      font-size: 24px;
+      font-weight: bold;
+      color: #111;
+      margin-top: 20px;
+    }
+    audio {
+      display: none;
+      margin-top: 20px;
+    }
+    button {
+      background-color: #d81b60;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      margin: 10px;
+      font-weight: bold;
+    }
+    button:hover {
+      background-color: #c2185b;
+    }
+    .nav-buttons {
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Bachelorette Game: Live View</h1>
+
+    <div id="questionDisplay">
+      <p id="questionText">Loading question...</p>
+      <button id="showAnswerBtn" onclick="toggleAnswer()">Show Answer</button>
+      <p id="answerText"></p>
+      <audio id="answerAudio" controls></audio>
+    </div>
+
+    <div class="nav-buttons">
+      <button onclick="prevQuestion()">Back</button>
+      <button onclick="nextQuestion()">Next</button>
+    </div>
+  </div>
+
+  <script>
+    let questions = [];
+    let currentIndex = 0;
+    let answerVisible = false;
+
+    async function loadQuestions() {
+      const res = await fetch('/get_answered_questions');
+      const data = await res.json();
+      questions = data.questions.filter(q => q.answered);
+      showQuestion();
+    }
+
+    function showQuestion() {
+      const questionText = document.getElementById('questionText');
+      const answerText = document.getElementById('answerText');
+      const audioPlayer = document.getElementById('answerAudio');
+      const showAnswerBtn = document.getElementById('showAnswerBtn');
+
+      const q = questions[currentIndex];
+      if (!q) {
+        questionText.textContent = 'No more questions!';
+        answerText.style.display = 'none';
+        audioPlayer.style.display = 'none';
+        showAnswerBtn.style.display = 'none';
+        return;
+      }
+
+      questionText.textContent = q.question;
+      answerText.textContent = q.answered_text || '';
+      answerText.style.display = 'none';
+      showAnswerBtn.textContent = 'Show Answer';
+      answerVisible = false;
+
+      if (q.answered_audio_path) {
+        audioPlayer.src = '/' + q.answered_audio_path;;
+        audioPlayer.style.display = 'none';
+      } else {
+        audioPlayer.style.display = 'none';
+        audioPlayer.src = '';
+      }
+    }
+
+    function toggleAnswer() {
+      answerVisible = !answerVisible;
+      const answerText = document.getElementById('answerText');
+      const audioPlayer = document.getElementById('answerAudio');
+      const btn = document.getElementById('showAnswerBtn');
+
+      answerText.style.display = answerVisible ? 'block' : 'none';
+      if (questions[currentIndex].answered_audio_path) {
+        audioPlayer.style.display = answerVisible ? 'block' : 'none';
+      }
+
+      btn.textContent = answerVisible ? 'Hide Answer' : 'Show Answer';
+    }
+
+    function nextQuestion() {
+      if (currentIndex < questions.length - 1) currentIndex++;
+      showQuestion();
+    }
+
+    function prevQuestion() {
+      if (currentIndex > 0) currentIndex--;
+      showQuestion();
+    }
+
+    loadQuestions();
+  </script>
+</body>
+</html>

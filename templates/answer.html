@@ -1,0 +1,172 @@
+<!-- answer.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Answer Questions</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #fef0f5;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
+    }
+    h1 {
+      color: #d81b60;
+      margin-bottom: 20px;
+    }
+    #questionBox {
+      margin-bottom: 20px;
+    }
+    #currentQuestion {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    #answerInput {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    button {
+      background-color: #d81b60;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      margin: 10px;
+    }
+    button:hover {
+      background-color: #c2185b;
+    }
+    #recordStatus {
+      font-style: italic;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Answer the Questions</h1>
+
+    <div id="questionBox">
+      <p id="currentQuestion">Loading question...</p>
+      <textarea id="answerInput" rows="4" placeholder="Type your answer here..."></textarea>
+
+      <div style="margin-top: 10px;">
+        <button id="recordBtn" onclick="toggleRecording()">🎙️ Start Recording</button>
+        <p id="recordStatus"></p>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button onclick="prevQuestion()">Back</button>
+      <button onclick="submitAnswer()">Next</button>
+    </div>
+  </div>
+
+  <script>
+    let questions = [];
+    let currentIndex = 0;
+    let mediaRecorder, audioChunks = [];
+    let isRecording = false;
+
+    async function loadQuestions() {
+      const res = await fetch('/get_unanswered_questions');
+      const data = await res.json();
+      questions = data.questions;
+      showQuestion();
+    }
+
+    function showQuestion() {
+      const q = questions[currentIndex];
+      document.getElementById('currentQuestion').textContent = q ? q.question : 'No more questions.';
+      document.getElementById('answerInput').value = '';
+      document.getElementById('recordStatus').textContent = '';
+      document.getElementById('recordBtn').textContent = '🎙️ Start Recording';
+      isRecording = false;
+    }
+
+    async function submitAnswer() {
+      const q = questions[currentIndex];
+      const text = document.getElementById('answerInput').value.trim();
+
+      if (!q) return;
+
+      if (audioChunks.length > 0) {
+        const blob = new Blob(audioChunks, { type: 'audio/webm' });
+        const formData = new FormData();
+        formData.append('audio', blob, 'recording.webm');
+        formData.append('id', q.id);
+
+        await fetch('/upload_audio', {
+          method: 'POST',
+          body: formData
+        });
+
+        audioChunks = [];
+      } else if (text) {
+        await fetch('/answer_question', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: q.id, answer: text })
+        });
+      }
+
+      currentIndex++;
+      showQuestion();
+    }
+
+    function prevQuestion() {
+      if (currentIndex > 0) currentIndex--;
+      showQuestion();
+    }
+
+    async function toggleRecording() {
+      const btn = document.getElementById('recordBtn');
+      const status = document.getElementById('recordStatus');
+
+      if (!isRecording) {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+
+        mediaRecorder.ondataavailable = e => {
+          audioChunks.push(e.data);
+        };
+
+        mediaRecorder.start();
+        btn.textContent = '⏹️ Stop Recording';
+        status.textContent = 'Recording...';
+      } else {
+        mediaRecorder.stop();
+        btn.textContent = '🎙️ Start Recording';
+        status.textContent = 'Recording saved. Ready to submit.';
+      }
+
+      isRecording = !isRecording;
+    }
+
+    loadQuestions();
+  </script>
+</body>
+</html>
