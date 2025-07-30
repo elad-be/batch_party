@@ -189,6 +189,24 @@ button:disabled {
   gap: 10px;
 }
 
+.nav-button {
+  background-color: #d81b60;
+  color: white;
+  text-decoration: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  transition: background-color 0.2s;
+  display: inline-block;
+}
+
+.nav-button:hover {
+  background-color: #c2185b;
+  color: white;
+  text-decoration: none;
+}
+
 /* Question box styles */
 .question-box {
   margin-bottom: 20px;
@@ -338,5 +356,10 @@ audio {
   .navigation {
     flex-direction: column;
     gap: 0.5rem;
+  }
+
+  .nav-buttons {
+    flex-direction: column;
+    gap: 10px;
   }
 }

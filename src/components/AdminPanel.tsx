@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useQuestions } from '../hooks/useQuestions';
 import { api } from '../services/api';
 
@@ -150,6 +151,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             </li>
           ))}
         </ul>
+      </div>
+
+      <div className="nav-buttons">
+        <Link to="/answer" className="nav-button">
+          Go to Answer Page
+        </Link>
+        <Link to="/play" className="nav-button">
+          Go to Play Page
+        </Link>
       </div>
     </div>
   );
