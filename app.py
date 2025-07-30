@@ -33,6 +33,10 @@ UPLOAD_FOLDER = 'static/audio'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+@app.route('/soundbar')
+def soundbar():
+    return render_template('soundbar.html')
+
 @app.route('/delete_question/<int:question_id>', methods=['DELETE'])
 def delete_question(question_id):
     question = Question.query.get(question_id)

@@ -1,4 +1,3 @@
-<!-- answer.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,7 +8,7 @@
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      background-color: #fef0f5;
+      background-color: #fff8f8;
       margin: 0;
       padding: 0;
       display: flex;
@@ -19,41 +18,63 @@
     }
     .container {
       background: white;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-      max-width: 600px;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.15);
+      max-width: 700px;
       width: 100%;
       text-align: center;
     }
     h1 {
       color: #d81b60;
+      font-size: 32px;
       margin-bottom: 20px;
+    }
+    #progressBarContainer {
+      width: 100%;
+      background-color: #f0f0f0;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      height: 20px;
+    }
+    #progressBar {
+      height: 100%;
+      width: 0%;
+      background-color: #d81b60;
+      transition: width 0.4s ease-in-out;
     }
     #questionBox {
       margin-bottom: 20px;
     }
     #currentQuestion {
-      font-size: 18px;
+      font-size: 20px;
       font-weight: bold;
-      margin-bottom: 10px;
+      margin-bottom: 14px;
     }
-    #answerInput {
+    textarea {
+      resize: vertical;
+      min-height: 60px;
+      max-height: 120px;
       width: 100%;
-      padding: 10px;
+      padding: 12px;
       border-radius: 8px;
-      border: 1px solid #ccc;
       font-size: 16px;
+      border: 1px solid #ccc;
+      overflow-y: auto;
+      line-height: 1.4;
+      font-family: inherit;
     }
     button {
       background-color: #d81b60;
       color: white;
       border: none;
-      padding: 10px 16px;
+      padding: 12px 20px;
       border-radius: 8px;
+      font-size: 16px;
       cursor: pointer;
       font-weight: bold;
-      margin: 10px;
+      margin: 10px 5px;
     }
     button:hover {
       background-color: #c2185b;
@@ -61,6 +82,7 @@
     #recordStatus {
       font-style: italic;
       color: #555;
+      margin-top: 6px;
     }
   </style>
 </head>
@@ -68,9 +90,13 @@
   <div class="container">
     <h1>Answer the Questions</h1>
 
+    <div id="progressBarContainer">
+      <div id="progressBar"></div>
+    </div>
+
     <div id="questionBox">
       <p id="currentQuestion">Loading question...</p>
-      <textarea id="answerInput" rows="4" placeholder="Type your answer here..."></textarea>
+      <textarea id="answerInput" placeholder="Type your answer here..."></textarea>
 
       <div style="margin-top: 10px;">
         <button id="recordBtn" onclick="toggleRecording()">🎙️ Start Recording</button>
@@ -82,6 +108,8 @@
       <button onclick="prevQuestion()">Back</button>
       <button onclick="submitAnswer()">Next</button>
     </div>
+
+    <audio id="submitSound" src="/static/sound/submit_answer.mp3"></audio>
   </div>
 
   <script>
@@ -89,6 +117,16 @@
     let currentIndex = 0;
     let mediaRecorder, audioChunks = [];
     let isRecording = false;
+    let recordSeconds = 0;
+    let recordTimer;
+
+    const textarea = document.getElementById('answerInput');
+    textarea.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        submitAnswer();
+      }
+    });
 
     async function loadQuestions() {
       const res = await fetch('/get_unanswered_questions');
@@ -97,19 +135,25 @@
       showQuestion();
     }
 
+    function updateProgress() {
+      const progress = ((currentIndex + 1) / questions.length) * 100;
+      document.getElementById('progressBar').style.width = progress + '%';
+    }
+
     function showQuestion() {
       const q = questions[currentIndex];
       document.getElementById('currentQuestion').textContent = q ? q.question : 'No more questions.';
-      document.getElementById('answerInput').value = '';
+      textarea.value = '';
       document.getElementById('recordStatus').textContent = '';
       document.getElementById('recordBtn').textContent = '🎙️ Start Recording';
       isRecording = false;
+      clearInterval(recordTimer);
+      updateProgress();
     }
 
     async function submitAnswer() {
       const q = questions[currentIndex];
-      const text = document.getElementById('answerInput').value.trim();
-
+      const text = textarea.value.trim();
       if (!q) return;
 
       if (audioChunks.length > 0) {
@@ -132,6 +176,7 @@
         });
       }
 
+      document.getElementById('submitSound').play();
       currentIndex++;
       showQuestion();
     }
@@ -155,10 +200,16 @@
         };
 
         mediaRecorder.start();
+        recordSeconds = 0;
+        recordTimer = setInterval(() => {
+          recordSeconds++;
+          status.textContent = `Recording... ${recordSeconds}s`;
+        }, 1000);
+
         btn.textContent = '⏹️ Stop Recording';
-        status.textContent = 'Recording...';
       } else {
         mediaRecorder.stop();
+        clearInterval(recordTimer);
         btn.textContent = '🎙️ Start Recording';
         status.textContent = 'Recording saved. Ready to submit.';
       }

@@ -136,6 +136,27 @@
     li span {
       font-weight: bold;
     }
+
+    .nav-links {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      background-color: #d81b60;
+      color: white;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: bold;
+      transition: background-color 0.2s;
+    }
+
+    .nav-links a:hover {
+      background-color: #c2185b;
+    }
   </style>
 </head>
 <body>
@@ -157,7 +178,13 @@
     <div id="questionWrapper">
       <ul id="questionList"></ul>
     </div>
+
+    <div class="nav-links">
+      <a href="/answer">Go to Answer Page</a>
+      <a href="/play">Go to Play Page</a>
+    </div>
   </div>
+
   <audio id="soundAddQuestion" src="/static/sound/add_question.mp3"></audio>
   <script>
     let currentFilter = 'all';
