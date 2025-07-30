@@ -3,12 +3,12 @@ import { Link } from 'react-router-dom';
 import { useQuestions } from '../hooks/useQuestions';
 import { api } from '../services/api';
 
-interface AnswerInterfaceProps {
+interface AnswerPageProps {
   dataHook?: string;
 }
 
-export const AnswerInterface: React.FC<AnswerInterfaceProps> = ({
-  dataHook = 'answer-interface',
+export const AnswerPage: React.FC<AnswerPageProps> = ({
+  dataHook = 'answer-page',
 }) => {
   const { questions } = useQuestions('unanswered');
   const [currentIndex, setCurrentIndex] = useState(0);

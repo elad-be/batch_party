@@ -2,12 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuestions } from '../hooks/useQuestions';
 
-interface GamePlayViewProps {
+interface PlayPageProps {
   dataHook?: string;
 }
 
-export const GamePlayView: React.FC<GamePlayViewProps> = ({
-  dataHook = 'game-play-view',
+export const PlayPage: React.FC<PlayPageProps> = ({
+  dataHook = 'play-page',
 }) => {
   const { questions } = useQuestions('answered');
   const [currentIndex, setCurrentIndex] = useState(0);

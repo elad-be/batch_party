@@ -3,12 +3,12 @@ import { Link } from 'react-router-dom';
 import { useQuestions } from '../hooks/useQuestions';
 import { api } from '../services/api';
 
-interface AdminPanelProps {
+interface AdminPageProps {
   dataHook?: string;
 }
 
-export const AdminPanel: React.FC<AdminPanelProps> = ({
-  dataHook = 'admin-panel',
+export const AdminPage: React.FC<AdminPageProps> = ({
+  dataHook = 'admin-page',
 }) => {
   const [questionInput, setQuestionInput] = useState('');
   const [currentFilter, setCurrentFilter] = useState<

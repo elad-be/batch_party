@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
-import { AdminPanel } from './components/AdminPanel';
-import { AnswerInterface } from './components/AnswerInterface';
-import { GamePlayView } from './components/GamePlayView';
+import { AdminPage } from './components/AdminPanel';
+import { AnswerPage } from './components/AnswerInterface';
+import { PlayPage } from './components/GamePlayView';
 
 const App: React.FC = () => {
   return (
@@ -15,15 +15,12 @@ const App: React.FC = () => {
         </nav>
 
         <Routes>
-          <Route path="/" element={<AdminPanel dataHook="admin-panel" />} />
+          <Route path="/" element={<AdminPage dataHook="admin-page" />} />
           <Route
             path="/answer"
-            element={<AnswerInterface dataHook="answer-interface" />}
+            element={<AnswerPage dataHook="answer-page" />}
           />
-          <Route
-            path="/play"
-            element={<GamePlayView dataHook="game-play-view" />}
-          />
+          <Route path="/play" element={<PlayPage dataHook="play-page" />} />
         </Routes>
       </div>
     </Router>
