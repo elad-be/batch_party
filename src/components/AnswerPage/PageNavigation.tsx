@@ -1,0 +1,25 @@
+import React from 'react';
+import { Link } from 'react-router-dom';
+
+interface PageNavigationProps {
+  dataHook?: string;
+}
+
+export const PageNavigation: React.FC<PageNavigationProps> = ({
+  dataHook = 'page-navigation',
+}) => {
+  return (
+    <div
+      className="nav-buttons"
+      style={{ marginTop: '20px' }}
+      data-hook={dataHook}
+    >
+      <Link to="/" className="nav-button">
+        Go to Admin Page
+      </Link>
+      <Link to="/play" className="nav-button">
+        Go to Play Page
+      </Link>
+    </div>
+  );
+};
