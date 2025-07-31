@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useQuestions } from '../../hooks/useQuestions';
 import { api } from '../../services/api';
 import { AnswerInput } from './AnswerInput';
@@ -12,13 +12,14 @@ interface AnswerPageProps {
   dataHook?: string;
 }
 
-export const AnswerPage: React.FC<AnswerPageProps> = ({
+export const AnswerPage = ({
   dataHook = 'answer-page',
-}) => {
+}: AnswerPageProps) => {
   const { questions } = useQuestions('unanswered');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answerText, setAnswerText] = useState('');
   const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
+  const audioBlobRef = useRef<Blob | null>(null);
 
   const currentQuestion = questions[currentIndex];
 
@@ -28,21 +29,41 @@ export const AnswerPage: React.FC<AnswerPageProps> = ({
   };
 
   useEffect(() => {
-    showQuestion();
-  }, [currentIndex, questions]);
+    setAnswerText('');
+    setAudioChunks([]);
+  }, [currentIndex]);
+
+  // Ensure currentIndex is always in bounds after questions update
+  useEffect(() => {
+    if (questions.length > 0 && currentIndex >= questions.length) {
+      setCurrentIndex(questions.length - 1);
+    }
+  }, [questions.length, currentIndex]);
+
 
   const submitAnswer = async () => {
     if (!currentQuestion) return;
 
-    if (audioChunks.length > 0) {
+    // Save both text and audio if present
+    if (answerText.trim()) {
+      await api.answerQuestion(currentQuestion.id, answerText);
+      setAnswerText('');
+    }
+    if (audioBlobRef.current) {
+      await api.uploadAudio(currentQuestion.id, audioBlobRef.current);
+      audioBlobRef.current = null;
+      setAudioChunks([]);
+    } else if (audioChunks.length > 0) {
       const blob = new Blob(audioChunks, { type: 'audio/webm' });
       await api.uploadAudio(currentQuestion.id, blob);
       setAudioChunks([]);
-    } else if (answerText.trim()) {
-      await api.answerQuestion(currentQuestion.id, answerText);
     }
 
-    setCurrentIndex((prev) => prev + 1);
+    setCurrentIndex(0);
+  };
+  // Skip button handler
+  const skipQuestion = () => {
+    setCurrentIndex((prev) => (prev < questions.length - 1 ? prev + 1 : prev));
   };
 
   const prevQuestion = () => {
@@ -53,6 +74,7 @@ export const AnswerPage: React.FC<AnswerPageProps> = ({
 
   const handleRecordingComplete = (chunks: Blob[]) => {
     setAudioChunks(chunks);
+    audioBlobRef.current = new Blob(chunks, { type: 'audio/webm' });
   };
 
   if (!currentQuestion) {
@@ -74,6 +96,7 @@ export const AnswerPage: React.FC<AnswerPageProps> = ({
       <AudioRecorder
         onRecordingComplete={handleRecordingComplete}
         dataHook="audio-recorder"
+        resetKey={currentQuestion?.id ?? currentIndex}
       />
 
       <QuestionNavigation
@@ -81,8 +104,9 @@ export const AnswerPage: React.FC<AnswerPageProps> = ({
         onSubmit={submitAnswer}
         dataHook="question-navigation"
       />
+      <button onClick={skipQuestion} style={{ marginTop: 16 }}>Skip</button>
 
-      <PageNavigation dataHook="page-navigation" />
+
     </div>
   );
 };

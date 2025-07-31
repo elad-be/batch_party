@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuestions } from '../../hooks/useQuestions';
 import { NoQuestionsMessage } from './NoQuestionsMessage';
 import { PageNavigation } from './PageNavigation';
@@ -77,9 +77,6 @@ export const PlayPage: React.FC<PlayPageProps> = ({
 
       <QuestionDisplay
         question={currentQuestion}
-        answerVisible={answerVisible}
-        onToggleAnswer={toggleAnswer}
-        onCountdownComplete={handleCountdownComplete}
         dataHook="question-display"
       />
 

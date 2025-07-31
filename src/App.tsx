@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { AdminPage } from './components/AdminPage';
 import { AnswerPage } from './components/AnswerPage';

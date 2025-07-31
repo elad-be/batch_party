@@ -1,35 +1,51 @@
-import React from 'react';
+import { useState } from 'react';
 import { Question } from '../../types';
 import { AnswerDisplay } from './AnswerDisplay';
-import { CountdownTimer } from './CountdownTimer';
 
 interface QuestionDisplayProps {
   question: Question;
-  answerVisible: boolean;
-  onToggleAnswer: () => void;
-  onCountdownComplete: () => void;
   dataHook?: string;
 }
 
-export const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
+export const QuestionDisplay = ({
   question,
-  answerVisible,
-  onToggleAnswer,
-  onCountdownComplete,
   dataHook = 'question-display',
-}) => {
+}: QuestionDisplayProps) => {
+  const [answerVisible, setAnswerVisible] = useState(false);
+  const [countdown, setCountdown] = useState<number | null>(null);
+
+  const startCountdown = (onCountdownComplete?: () => void) => {
+    setCountdown(3);
+    setTimeout(() => setCountdown(2), 800);
+    setTimeout(() => setCountdown(1), 1600);
+    setTimeout(() => {
+      setCountdown(null);
+      onCountdownComplete?.();
+    }, 2400);
+  };
+
+
+  const handleButtonClick = () => {
+    if(!answerVisible) {
+      startCountdown(() => setAnswerVisible(true));
+    } else {
+      setAnswerVisible(false);
+    }
+  }
+
   return (
     <div className="question-display" data-hook={dataHook}>
       <p className="question-text">{question.question}</p>
-
-      <CountdownTimer
-        onCountdownComplete={onCountdownComplete}
-        dataHook="countdown-timer"
-      />
-
-      <button onClick={onToggleAnswer}>
-        {answerVisible ? 'Hide Answer' : 'Show Answer'}
+      <button
+        onClick={handleButtonClick}
+        disabled={!!countdown}
+      >
+        {answerVisible ? 'Hide Answer'  : 'Show Answer'}
       </button>
+
+      {!answerVisible && !!countdown && (
+        <div className="countdown">{countdown}</div>
+      )}
 
       {answerVisible && (
         <AnswerDisplay question={question} dataHook="answer-display" />

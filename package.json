@@ -6,8 +6,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "start": "concurrently \"python app.py\" \"npm run dev\"",
-    "start:backend": "python app.py",
+    "start": "concurrently \"python3 app.py\" \"npm run dev\"",
+    "start:backend": "python3 app.py",
     "start:frontend": "npm run dev"
   },
   "dependencies": {

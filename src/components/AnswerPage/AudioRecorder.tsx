@@ -1,55 +1,91 @@
-import React, { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 
 interface AudioRecorderProps {
-  onRecordingComplete: (audioChunks: Blob[]) => void;
+  onRecordingComplete: (chunks: Blob[]) => void;
   dataHook?: string;
+  resetKey?: string | number;
 }
 
 export const AudioRecorder: React.FC<AudioRecorderProps> = ({
   onRecordingComplete,
   dataHook = 'audio-recorder',
+  resetKey,
 }) => {
-  const [isRecording, setIsRecording] = useState(false);
-  const [recordStatus, setRecordStatus] = useState('');
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const [recording, setRecording] = useState(false);
+  const [audioURL, setAudioURL] = useState<string | null>(null);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  const [timer, setTimer] = useState(0);
+  const timerRef = useRef<number | null>(null);
+  const chunksRef = useRef<Blob[]>([]); // <-- use ref for chunks
 
-  const toggleRecording = async () => {
-    if (!isRecording) {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: true,
-        });
-        const mediaRecorder = new MediaRecorder(stream);
-        mediaRecorderRef.current = mediaRecorder;
+  const startRecording = async () => {
+    setAudioURL(null);
+    chunksRef.current = [];
+    setRecording(true);
+    setTimer(0);
 
-        const chunks: Blob[] = [];
-        mediaRecorder.ondataavailable = (e) => {
-          chunks.push(e.data);
-        };
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const recorder = new MediaRecorder(stream);
+    setMediaRecorder(recorder);
 
-        mediaRecorder.onstop = () => {
-          onRecordingComplete(chunks);
-        };
+    recorder.ondataavailable = (e) => {
+      chunksRef.current.push(e.data);
+    };
 
-        mediaRecorder.start();
-        setIsRecording(true);
-        setRecordStatus('Recording...');
-      } catch (error) {
-        console.error('Failed to start recording:', error);
-      }
-    } else {
-      mediaRecorderRef.current?.stop();
-      setIsRecording(false);
-      setRecordStatus('Recording saved. Ready to submit.');
-    }
+    recorder.onstop = () => {
+      const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+      setAudioURL(URL.createObjectURL(blob));
+      onRecordingComplete(chunksRef.current);
+      setRecording(false);
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+
+    recorder.start();
+
+    timerRef.current = setInterval(() => {
+      setTimer((t) => t + 1);
+    }, 1000);
   };
 
+  const stopRecording = () => {
+    mediaRecorder?.stop();
+    setRecording(false);
+    if (timerRef.current) clearInterval(timerRef.current);
+  };
+
+  const reRecord = () => {
+    setAudioURL(null);
+    chunksRef.current = [];
+    setTimer(0);
+  };
+
+  // Reset UI when a new question is loaded (when audioURL should be cleared)
+  useEffect(() => {
+    setAudioURL(null);
+    setTimer(0);
+    chunksRef.current = [];
+    setRecording(false);
+    setMediaRecorder(null);
+    if (timerRef.current) clearInterval(timerRef.current);
+  }, [resetKey]);
+
   return (
-    <div className="recording-section" data-hook={dataHook}>
-      <button onClick={toggleRecording}>
-        {isRecording ? '⏹️ Stop Recording' : '🎙️ Start Recording'}
-      </button>
-      <p className="record-status">{recordStatus}</p>
+    <div data-hook={dataHook}>
+      {!recording && !audioURL && (
+        <button onClick={startRecording}>Start Recording</button>
+      )}
+      {recording && (
+        <div>
+          <span>Recording... {timer}s</span>
+          <button onClick={stopRecording}>Stop</button>
+        </div>
+      )}
+      {audioURL && !recording && (
+        <div>
+          <audio controls src={audioURL} />
+          <button onClick={reRecord}>Re-record</button>
+        </div>
+      )}
     </div>
   );
 };
