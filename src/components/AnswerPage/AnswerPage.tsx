@@ -1,10 +1,10 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useQuestions } from '../../hooks/useQuestions';
 import { api } from '../../services/api';
 import { AnswerInput } from './AnswerInput';
+import './AnswerPage.css';
 import { AudioRecorder } from './AudioRecorder';
 import { NoQuestionsMessage } from './NoQuestionsMessage';
-import { PageNavigation } from './PageNavigation';
 import { QuestionDisplay } from './QuestionDisplay';
 import { QuestionNavigation } from './QuestionNavigation';
 
@@ -12,9 +12,7 @@ interface AnswerPageProps {
   dataHook?: string;
 }
 
-export const AnswerPage = ({
-  dataHook = 'answer-page',
-}: AnswerPageProps) => {
+export const AnswerPage = ({ dataHook = 'answer-page' }: AnswerPageProps) => {
   const { questions } = useQuestions('unanswered');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answerText, setAnswerText] = useState('');
@@ -39,7 +37,6 @@ export const AnswerPage = ({
       setCurrentIndex(questions.length - 1);
     }
   }, [questions.length, currentIndex]);
-
 
   const submitAnswer = async () => {
     if (!currentQuestion) return;
@@ -104,9 +101,9 @@ export const AnswerPage = ({
         onSubmit={submitAnswer}
         dataHook="question-navigation"
       />
-      <button onClick={skipQuestion} style={{ marginTop: 16 }}>Skip</button>
-
-
+      <button onClick={skipQuestion} style={{ marginTop: 16 }}>
+        Skip
+      </button>
     </div>
   );
 };

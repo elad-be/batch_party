@@ -3,6 +3,7 @@ import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { AdminPage } from './components/AdminPage';
 import { AnswerPage } from './components/AnswerPage';
 import { PlayPage } from './components/PlayPage';
+import './components/shared/SharedStyles.css';
 
 const App: React.FC = () => {
   return (

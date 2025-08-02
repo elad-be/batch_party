@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import './PageNavigation.css';
 
 interface PageNavigationProps {
   dataHook?: string;

@@ -1,0 +1,27 @@
+/* AnswerPage Component Styles */
+
+/* Question box styles */
+.question-box {
+  margin-bottom: 20px;
+}
+
+.current-question {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.recording-section {
+  margin-top: 10px;
+}
+
+.record-status {
+  font-style: italic;
+  color: #555;
+  margin-top: 5px;
+}
+
+/* Answer input styles */
+.answer-input {
+  width: 100%;
+}

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Question } from '../../types';
 import { QuestionItem } from './QuestionItem';
+import './QuestionList.css';
 
 interface QuestionListProps {
   questions: Question[];

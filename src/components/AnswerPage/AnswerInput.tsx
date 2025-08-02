@@ -18,6 +18,7 @@ export const AnswerInput: React.FC<AnswerInputProps> = ({
       rows={4}
       placeholder="Type your answer here..."
       data-hook={dataHook}
+      className="answer-input"
     />
   );
 };

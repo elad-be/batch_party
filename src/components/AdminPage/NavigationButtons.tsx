@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import './NavigationButtons.css';
 
 interface NavigationButtonsProps {
   dataHook?: string;

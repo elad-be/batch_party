@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuestions } from '../../hooks/useQuestions';
 import { api } from '../../services/api';
+import './AdminPage.css';
 import { FilterButtons } from './FilterButtons';
 import { NavigationButtons } from './NavigationButtons';
 import { QuestionForm } from './QuestionForm';

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useQuestions } from '../../hooks/useQuestions';
 import { NoQuestionsMessage } from './NoQuestionsMessage';
 import { PageNavigation } from './PageNavigation';
+import './PlayPage.css';
 import { ProgressBar } from './ProgressBar';
 import { QuestionDisplay } from './QuestionDisplay';
 import { QuestionNavigation } from './QuestionNavigation';
@@ -67,10 +68,7 @@ export const PlayPage: React.FC<PlayPageProps> = ({
         dataHook="progress-bar"
       />
 
-      <QuestionDisplay
-        question={currentQuestion}
-        dataHook="question-display"
-      />
+      <QuestionDisplay question={currentQuestion} dataHook="question-display" />
 
       <QuestionNavigation
         onPrevious={prevQuestion}

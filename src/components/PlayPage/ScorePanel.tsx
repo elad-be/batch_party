@@ -1,4 +1,5 @@
 import React from 'react';
+import './ScorePanel.css';
 
 interface ScorePanelProps {
   matchCount: number;

@@ -1,4 +1,5 @@
 import React from 'react';
+import './FilterButtons.css';
 
 type FilterType = 'all' | 'answered' | 'unanswered';
 

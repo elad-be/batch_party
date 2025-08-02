@@ -1,0 +1,22 @@
+/* FilterButtons Component Styles */
+
+.filter-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.filter-buttons button {
+  padding: 6px 12px;
+  font-size: 14px;
+  border-radius: 6px;
+  background-color: #fce4ec;
+  color: #d81b60;
+  border: 1px solid #d81b60;
+}
+
+.filter-buttons button.active {
+  background-color: #d81b60;
+  color: white;
+}

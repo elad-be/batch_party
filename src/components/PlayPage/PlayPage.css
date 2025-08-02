@@ -1,0 +1,16 @@
+/* PlayPage Component Styles */
+
+/* Question and answer text styles */
+.question-text {
+  margin-bottom: 20px;
+  opacity: 1;
+  transition: opacity 0.5s;
+}
+
+.answer-text {
+  font-weight: bold;
+  color: #111;
+  margin-top: 20px;
+  opacity: 1;
+  transition: opacity 0.5s;
+}
