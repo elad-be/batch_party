@@ -16,7 +16,7 @@ export const PlayPage: React.FC<PlayPageProps> = ({
 }) => {
   const { questions } = useQuestions('answered');
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [answerVisible, setAnswerVisible] = useState(false);
+  const [, setAnswerVisible] = useState(false);
   const [matchCount, setMatchCount] = useState(0);
 
   const currentQuestion = questions[currentIndex];
@@ -28,10 +28,6 @@ export const PlayPage: React.FC<PlayPageProps> = ({
   useEffect(() => {
     showQuestion();
   }, [currentIndex, questions]);
-
-  const toggleAnswer = () => {
-    setAnswerVisible(!answerVisible);
-  };
 
   const nextQuestion = () => {
     if (currentIndex < questions.length - 1) {
@@ -49,10 +45,6 @@ export const PlayPage: React.FC<PlayPageProps> = ({
     if (correct) {
       setMatchCount((prev) => prev + 1);
     }
-  };
-
-  const handleCountdownComplete = () => {
-    setAnswerVisible(true);
   };
 
   if (!currentQuestion) {
