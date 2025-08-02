@@ -5,6 +5,7 @@ import { AnswerInput } from './AnswerInput';
 import './AnswerPage.css';
 import { AudioRecorder } from './AudioRecorder';
 import { NoQuestionsMessage } from './NoQuestionsMessage';
+import { ProgressBar } from './ProgressBar';
 import { QuestionDisplay } from './QuestionDisplay';
 import { QuestionNavigation } from './QuestionNavigation';
 
@@ -20,11 +21,6 @@ export const AnswerPage = ({ dataHook = 'answer-page' }: AnswerPageProps) => {
   const audioBlobRef = useRef<Blob | null>(null);
 
   const currentQuestion = questions[currentIndex];
-
-  const showQuestion = () => {
-    setAnswerText('');
-    setAudioChunks([]);
-  };
 
   useEffect(() => {
     setAnswerText('');
@@ -74,6 +70,12 @@ export const AnswerPage = ({ dataHook = 'answer-page' }: AnswerPageProps) => {
     audioBlobRef.current = new Blob(chunks, { type: 'audio/webm' });
   };
 
+  // Check if user has provided any answer (text or audio)
+  const hasAnswer =
+    answerText.trim().length > 0 ||
+    audioChunks.length > 0 ||
+    audioBlobRef.current !== null;
+
   if (!currentQuestion) {
     return <NoQuestionsMessage dataHook="no-questions-message" />;
   }
@@ -81,6 +83,12 @@ export const AnswerPage = ({ dataHook = 'answer-page' }: AnswerPageProps) => {
   return (
     <div className="container" data-hook={dataHook}>
       <h1>Answer the Questions</h1>
+
+      <ProgressBar
+        current={currentIndex}
+        total={questions.length}
+        dataHook="question-progress"
+      />
 
       <QuestionDisplay question={currentQuestion} dataHook="question-display" />
 
@@ -90,20 +98,33 @@ export const AnswerPage = ({ dataHook = 'answer-page' }: AnswerPageProps) => {
         dataHook="answer-input"
       />
 
-      <AudioRecorder
-        onRecordingComplete={handleRecordingComplete}
-        dataHook="audio-recorder"
-        resetKey={currentQuestion?.id ?? currentIndex}
-      />
+      <div className="audio-recorder">
+        <AudioRecorder
+          onRecordingComplete={handleRecordingComplete}
+          dataHook="audio-recorder"
+          resetKey={currentQuestion?.id ?? currentIndex}
+        />
+      </div>
 
-      <QuestionNavigation
-        onPrevious={prevQuestion}
-        onSubmit={submitAnswer}
-        dataHook="question-navigation"
-      />
-      <button onClick={skipQuestion} style={{ marginTop: 16 }}>
-        Skip
-      </button>
+      <div className="button-section">
+        <div className="primary-actions">
+          <QuestionNavigation
+            onPrevious={prevQuestion}
+            onSubmit={submitAnswer}
+            isNextDisabled={!hasAnswer}
+            dataHook="question-navigation"
+          />
+        </div>
+        <div className="secondary-actions">
+          <button
+            onClick={skipQuestion}
+            className="skip-button"
+            data-hook="skip-button"
+          >
+            Skip
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

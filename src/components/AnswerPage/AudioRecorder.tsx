@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface AudioRecorderProps {
   onRecordingComplete: (chunks: Blob[]) => void;
@@ -13,7 +13,9 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
 }) => {
   const [recording, setRecording] = useState(false);
   const [audioURL, setAudioURL] = useState<string | null>(null);
-  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(
+    null,
+  );
   const [timer, setTimer] = useState(0);
   const timerRef = useRef<number | null>(null);
   const chunksRef = useRef<Blob[]>([]); // <-- use ref for chunks
@@ -71,19 +73,31 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
 
   return (
     <div data-hook={dataHook}>
+      <h3 style={{ marginBottom: '15px', color: '#d81b60' }}>
+        🎤 Audio Recording
+      </h3>
+
       {!recording && !audioURL && (
-        <button onClick={startRecording}>Start Recording</button>
+        <button onClick={startRecording} data-hook="start-recording">
+          Start Recording
+        </button>
       )}
+
       {recording && (
-        <div>
+        <div className="recording-status">
           <span>Recording... {timer}s</span>
-          <button onClick={stopRecording}>Stop</button>
+          <button onClick={stopRecording} data-hook="stop-recording">
+            Stop Recording
+          </button>
         </div>
       )}
+
       {audioURL && !recording && (
         <div>
-          <audio controls src={audioURL} />
-          <button onClick={reRecord}>Re-record</button>
+          <audio controls src={audioURL} style={{ marginBottom: '15px' }} />
+          <button onClick={reRecord} data-hook="re-record">
+            Re-record
+          </button>
         </div>
       )}
     </div>
