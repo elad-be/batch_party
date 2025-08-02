@@ -76,6 +76,7 @@ export const PlayPage: React.FC<PlayPageProps> = ({
         onPrevious={prevQuestion}
         onNext={nextQuestion}
         dataHook="question-navigation"
+        currentIndex={currentIndex}
       />
 
       <PageNavigation dataHook="page-navigation" />
